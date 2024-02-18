@@ -16,7 +16,8 @@ class UserProfile(models.Model):
 class Post(models.Model):
     caption = models.TextField(null = True, blank = True)
     post_img = models.ImageField(upload_to = "post/", null = True, blank = True)
-    user = models.ForeignKey(CustomUser,  on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser,  on_delete=models.CASCADE, related_name="post_owner")
+    like = models.ManyToManyField(CustomUser, related_name="likers")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     
@@ -27,10 +28,6 @@ class Comment(models.Model):
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     
-class Like(models.Model):
-    user= models.ForeignKey(CustomUser, on_delete=models.CASCADE)    
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    created_at = models.DateField(auto_now_add=True)
 
 
     
