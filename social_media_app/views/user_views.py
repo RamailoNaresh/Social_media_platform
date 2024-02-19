@@ -5,6 +5,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 from datetime import datetime
+import os
 
 
 def get_user(request):
@@ -41,6 +42,11 @@ def get_user_by_id(request, id):
 def delete_user(request, id):
     if request.method == "DELETE":
         user = CustomUser.objects.filter(id = id).first()
+        profile = UserProfile.objects.filter(user = user)
+        if profile.profile_img != "":
+                old_post_img = profile.profile_img.path
+                if os.path.exists(old_post_img):
+                    os.remove(old_post_img)
         if user:
             json_data = {
                 "name": user.name,
@@ -85,6 +91,8 @@ def create_user_profile(request, id):
             address = request.POST["address"]
             country = request.POST["country"]
             profile_img = request.FILES["profile_img"]
+            if len(str(phone_number)) != 10:
+                return JsonResponse({"message": "Phone number not valid"})
             if phone_number == "" or address == "" or country == "":
                 return JsonResponse({"message": "Fields cannot be empty"})
             userprofile = UserProfile.objects.create(phone_number= phone_number, address= address, country = country, user= user, profile_img = profile_img)
@@ -127,6 +135,12 @@ def update_profile(request, id):
         profile = UserProfile.objects.filter(user=user).first()
         if not profile:
             return JsonResponse({"message": "Profile doesn't exist"})
+        if len(str(phone_number)) != 10:
+                return JsonResponse({"message": "Phone number not valid"})
+        if profile.profile_img != "":
+                old_post_img = profile.profile_img.path
+                if os.path.exists(old_post_img):
+                    os.remove(old_post_img)
         filename = f"profile_{user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
         with open(profile_img_path, 'rb') as img_file:
             profile.profile_img.save(filename, img_file)

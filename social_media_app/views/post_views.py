@@ -47,6 +47,10 @@ def delete_post(request, id):
     if request.method == "DELETE":
         post = Post.objects.filter(id = id).first()
         if post:
+            if post.post_img != "":
+                old_post_img = post.post_img.path
+                if os.path.exists(old_post_img):
+                    os.remove(old_post_img)
             post.delete()
             return JsonResponse({"message": f"Post with id {id} is successfully deleted"})
         return JsonResponse({"message": "Post doesn't exist"})
@@ -58,6 +62,10 @@ def update_post(request, id):
     if request.method == "PUT":
         post = Post.objects.filter(id = id).first()
         if post:
+            if post.post_img != "":
+                old_post_img = post.post_img.path
+                if os.path.exists(old_post_img):
+                    os.remove(old_post_img)
             data = json.loads(request.body)
             post.caption = data["caption"]
             post_img_path = data["post_img"]
