@@ -36,20 +36,16 @@ def create_post(request, id):
     
     
 def get_posts(requets):
-    if request.method == "GET":
-        posts = Post.objects.all()
-        json_data = list(posts.values())
-        return JsonResponse({"message": "Data Received", "data": json_data})
-    return JsonResponse({"message": "Invalid request method"})
+    posts = Post.objects.all()
+    json_data = list(posts.values())
+    return JsonResponse({"message": "Data Received", "data": json_data})
 
 
 def get_post_by_id(request, id):
-    if request.method == "GET":
-        post = Post.objects.filter(id = id).values().first()
-        if post:
-            return JsonResponse({"data":post})
-        return JsonResponse({"message": "post doesn't exists"})
-    return JsonResponse({"message": "Invalid request method"})
+    post = Post.objects.filter(id = id).values().first()
+    if post:
+        return JsonResponse({"data":post})
+    return JsonResponse({"message": "post doesn't exists"})
 
 @csrf_exempt
 def delete_post(request, id):
@@ -104,15 +100,13 @@ def like_post(request, user_id, post_id):
     return JsonResponse({"message": "Post doesn't exist"})
 
 def get_likes(request, post_id):
-    if request.method == "GET":
-        post = Post.objects.filter(id = post_id).first()
-        if post:
-            likes = post.like.count()
-            json_data = {
-                "caption": post.caption,
-                "post_img":post.post_img.url
-            }
-            return JsonResponse({"Post": json_data, "like": likes})
-        return JsonResponse({"message": "Post doesn't exist"})
-    return JsonResponse({"message": "Invalid request method"})
+    post = Post.objects.filter(id = post_id).first()
+    if post:
+        likes = post.like.count()
+        json_data = {
+            "caption": post.caption,
+            "post_img":post.post_img.url
+        }
+        return JsonResponse({"Post": json_data, "like": likes})
+    return JsonResponse({"message": "Post doesn't exist"})
         

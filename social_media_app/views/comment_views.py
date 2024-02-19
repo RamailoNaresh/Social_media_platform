@@ -26,22 +26,18 @@ def create_comment(request, user_id, post_id):
 
 
 def get_comment_by_id(request, id):
-    if request.method == "GET":
-        comment = Comment.objects.filter(id = id).values().first()
-        if comment:
-            return JsonResponse({"message": "Data received", "data": comment})
-        return JsonResponse({"message": "Comment doesn't exist"})
-    return JsonResponse({"message": "Invalid request method"})
+    comment = Comment.objects.filter(id = id).values().first()
+    if comment:
+        return JsonResponse({"message": "Data received", "data": comment})
+    return JsonResponse({"message": "Comment doesn't exist"})
 
 def get_comment_of_post(request, post_id):
-    if request.method == "GET":
-        post = Post.objects.filter(id = post_id).first()
-        if post:
-            comments = Comment.objects.filter(post = post).values()
-            data = list(comments)
-            return JsonResponse({"message": "data received", "data": data})
-        return JsonResponse({"message": "Post doesn't exists"})
-    return JsonResponse({"message": "Invalid request method"})
+    post = Post.objects.filter(id = post_id).first()
+    if post:
+        comments = Comment.objects.filter(post = post).values()
+        data = list(comments)
+        return JsonResponse({"message": "data received", "data": data})
+    return JsonResponse({"message": "Post doesn't exists"})
 
 
 @csrf_exempt
