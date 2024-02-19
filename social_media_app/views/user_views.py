@@ -4,6 +4,8 @@ from django.http import JsonResponse, HttpResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+from datetime import datetime
+
 
 def get_user(request):
     datas = CustomUser.objects.all()
