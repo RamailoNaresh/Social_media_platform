@@ -8,39 +8,48 @@ import os
 @csrf_exempt
 def create_post(request, id):
     if request.method == "POST":
-        caption = request.POST["caption"]
-        post_img = request.FILES["post_img"]
-        if post_img == "":
-            if caption == "":
-                return JsonResponse({"message": "Atleast one field is required"})
-        user = CustomUser.objects.filter(id=id).first()
-        if user:
-            post = Post.objects.create(caption=caption, post_img=post_img, user=user)
-            response_data = {
-                "message": "Post successfully created",
-                "data": {
-                    "id": post.id,
-                    "caption": post.caption,
-                    "post_img": post.post_img.url,
-                    "user": post.user.id
+        try:
+            caption = request.POST["caption"]
+            post_img = request.FILES["post_img"]
+            if post_img == "":
+                if caption == "":
+                    return JsonResponse({"message": "Atleast one field is required"})
+            user = CustomUser.objects.filter(id=id).first()
+            if user:
+                post = Post.objects.create(caption=caption, post_img=post_img, user=user)
+                response_data = {
+                    "message": "Post successfully created",
+                    "data": {
+                        "id": post.id,
+                        "caption": post.caption,
+                        "post_img": post.post_img.url,
+                        "user": post.user.id
+                    }
                 }
-            }
-            return JsonResponse(response_data, status=200)  
-        else:
-            return JsonResponse({"message": "User doesn't exist"}, status=400)
+                return JsonResponse(response_data)  
+            else:
+                return JsonResponse({"message": "User doesn't exist"})
+        except:
+            return JsonResponse({"message": "Error occurred"})
     else:
-        return JsonResponse({"message": "Invalid request method"}, status=400)
+        return JsonResponse({"message": "Invalid request method"})
+    
+    
 def get_posts(requets):
-    posts = Post.objects.all()
-    json_data = list(posts.values())
-    return JsonResponse({"message": "Data Received", "data": json_data})
+    if request.method == "GET":
+        posts = Post.objects.all()
+        json_data = list(posts.values())
+        return JsonResponse({"message": "Data Received", "data": json_data})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 def get_post_by_id(request, id):
-    post = Post.objects.filter(id = id).values().first()
-    if post:
-        return JsonResponse({"data":post})
-    return JsonResponse({"message": "post doesn't exists"})
+    if request.method == "GET":
+        post = Post.objects.filter(id = id).values().first()
+        if post:
+            return JsonResponse({"data":post})
+        return JsonResponse({"message": "post doesn't exists"})
+    return JsonResponse({"message": "Invalid request method"})
 
 @csrf_exempt
 def delete_post(request, id):
@@ -54,7 +63,7 @@ def delete_post(request, id):
             post.delete()
             return JsonResponse({"message": f"Post with id {id} is successfully deleted"})
         return JsonResponse({"message": "Post doesn't exist"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 # method when data is passed in json format
 @csrf_exempt
@@ -66,16 +75,19 @@ def update_post(request, id):
                 old_post_img = post.post_img.path
                 if os.path.exists(old_post_img):
                     os.remove(old_post_img)
-            data = json.loads(request.body)
-            post.caption = data["caption"]
-            post_img_path = data["post_img"]
-            filename = f"post_{post.id}.jpg"
-            with open(post_img_path, 'rb') as img_file:
-                post.post_img.save(filename, img_file)
-            post.save()
-            return JsonResponse({"message": "User data successfully updated"})
+            try:
+                data = json.loads(request.body)
+                post.caption = data["caption"]
+                post_img_path = data["post_img"]
+                filename = f"post_{post.id}.jpg"
+                with open(post_img_path, 'rb') as img_file:
+                    post.post_img.save(filename, img_file)
+                post.save()
+                return JsonResponse({"message": "User data successfully updated"})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message": "User doesn't exist"})
-    return JsonResponse({"message": "Error occured"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 def like_post(request, user_id, post_id):
@@ -92,13 +104,15 @@ def like_post(request, user_id, post_id):
     return JsonResponse({"message": "Post doesn't exist"})
 
 def get_likes(request, post_id):
-    post = Post.objects.filter(id = post_id).first()
-    if post:
-        likes = post.like.count()
-        json_data = {
-            "caption": post.caption,
-            "post_img":post.post_img.url
-        }
-        return JsonResponse({"Post": json_data, "like": likes})
-    return JsonResponse({"message": "Post doesn't exist"})
+    if request.method == "GET":
+        post = Post.objects.filter(id = post_id).first()
+        if post:
+            likes = post.like.count()
+            json_data = {
+                "caption": post.caption,
+                "post_img":post.post_img.url
+            }
+            return JsonResponse({"Post": json_data, "like": likes})
+        return JsonResponse({"message": "Post doesn't exist"})
+    return JsonResponse({"message": "Invalid request method"})
         
