@@ -3,7 +3,7 @@ from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
-
+import os
 
 @csrf_exempt
 def create_post(request, id):
@@ -52,6 +52,7 @@ def delete_post(request, id):
         return JsonResponse({"message": "Post doesn't exist"})
     return JsonResponse({"message": "Error occurred"})
 
+# method when data is passed in json format
 @csrf_exempt
 def update_post(request, id):
     if request.method == "PUT":
@@ -60,7 +61,7 @@ def update_post(request, id):
             data = json.loads(request.body)
             post.caption = data["caption"]
             post_img_path = data["post_img"]
-            filename = f"post_{post.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            filename = f"post_{post.id}.jpg"
             with open(post_img_path, 'rb') as img_file:
                 post.post_img.save(filename, img_file)
             post.save()
