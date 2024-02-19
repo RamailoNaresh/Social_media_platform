@@ -16,6 +16,7 @@ def get_user(request):
 @csrf_exempt
 def create_user(request):
     if request.method == "POST":
+        try:
             data = json.loads(request.body)
             name = data["name"]
             email = data["email"]
@@ -26,8 +27,10 @@ def create_user(request):
             if user:
                 return JsonResponse({"error": "Email already exists"})
             user1 = CustomUser.objects.create(name = name, email = email, password = make_password(password))
-            return JsonResponse({"message": "User created successfully", "data": data}, status = 200)
-    return JsonResponse({"message": "Error occured"}, status = 500)
+            return JsonResponse({"message": "User created successfully", "data": data})
+        except:
+            return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 def get_user_by_id(request, id):
@@ -56,29 +59,32 @@ def delete_user(request, id):
             return JsonResponse({"message": "User successfully deleted", "data": json_data})
         else:
             return JsonResponse({"message": "User doesn't exist"})
-    return JsonResponse({"message": "Error occured"})
+    return JsonResponse({"message": "Invalid request method"})
     
 @csrf_exempt
 def update_user(request, id):
     if request.method == "PUT":
         user = CustomUser.objects.filter(id = id).first()
         if user:
-            data = json.loads(request.body)
-            user1 = CustomUser.objects.exclude(id=user.id).filter(email=data["email"]).first()
-            if user1:
-                return JsonResponse({"message": "User already exist with give email"})
-            user.name = data["name"]
-            user.email = data["email"]
-            user.password = make_password(data["password"])
-            user.save()
-            json_data = {
-                "name": user.name,
-                "email": user.email,
-                "password": user.password
-            }
-            return JsonResponse({"message": "User data successfully updated","data": json_data})
+            try:
+                data = json.loads(request.body)
+                user1 = CustomUser.objects.exclude(id=user.id).filter(email=data["email"]).first()
+                if user1:
+                    return JsonResponse({"message": "User already exist with give email"})
+                user.name = data["name"]
+                user.email = data["email"]
+                user.password = make_password(data["password"])
+                user.save()
+                json_data = {
+                    "name": user.name,
+                    "email": user.email,
+                    "password": user.password
+                }
+                return JsonResponse({"message": "User data successfully updated","data": json_data})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message": "User doesn't exist"})
-    return JsonResponse({"message": "Error occured"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 
@@ -87,18 +93,21 @@ def create_user_profile(request, id):
     if request.method == "POST":
         user = CustomUser.objects.filter(id = id).first()
         if user:
-            phone_number = request.POST["phone_number"]
-            address = request.POST["address"]
-            country = request.POST["country"]
-            profile_img = request.FILES["profile_img"]
-            if len(str(phone_number)) != 10:
-                return JsonResponse({"message": "Phone number not valid"})
-            if phone_number == "" or address == "" or country == "":
-                return JsonResponse({"message": "Fields cannot be empty"})
-            userprofile = UserProfile.objects.create(phone_number= phone_number, address= address, country = country, user= user, profile_img = profile_img)
-            return JsonResponse({"message": "user profile created"})
+            try:
+                phone_number = request.POST["phone_number"]
+                address = request.POST["address"]
+                country = request.POST["country"]
+                profile_img = request.FILES["profile_img"]
+                if len(str(phone_number)) != 10:
+                    return JsonResponse({"message": "Phone number not valid"})
+                if phone_number == "" or address == "" or country == "":
+                    return JsonResponse({"message": "Fields cannot be empty"})
+                userprofile = UserProfile.objects.create(phone_number= phone_number, address= address, country = country, user= user, profile_img = profile_img)
+                return JsonResponse({"message": "user profile created"})
+            except:
+                return JsonResponse({"message": "Error Occurred"})
         return JsonResponse({"message": "User doesn;t exist"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 # @csrf_exempt
@@ -123,34 +132,37 @@ def create_user_profile(request, id):
 @csrf_exempt
 def update_profile(request, id):
     if request.method == "PUT":
-        data = json.loads(request.body)
-        phone_number = data.get('phone_number')
-        address = data.get('address')
-        country = data.get('country')
-        profile_img_path = data.get('profile_img')
-        user = CustomUser.objects.filter(id=id).first()
-        if not user:
-            return JsonResponse({"message": "User doesn't exist"})
-        
-        profile = UserProfile.objects.filter(user=user).first()
-        if not profile:
-            return JsonResponse({"message": "Profile doesn't exist"})
-        if len(str(phone_number)) != 10:
-                return JsonResponse({"message": "Phone number not valid"})
-        if profile.profile_img != "":
-                old_post_img = profile.profile_img.path
-                if os.path.exists(old_post_img):
-                    os.remove(old_post_img)
-        filename = f"profile_{user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-        with open(profile_img_path, 'rb') as img_file:
-            profile.profile_img.save(filename, img_file)
-        profile.phone_number = phone_number
-        profile.address = address
-        profile.country = country
-        profile.save()      
-        return JsonResponse({"message": "Profile successfully updated"})
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone_number')
+            address = data.get('address')
+            country = data.get('country')
+            profile_img_path = data.get('profile_img')
+            user = CustomUser.objects.filter(id=id).first()
+            if not user:
+                return JsonResponse({"message": "User doesn't exist"})
+            
+            profile = UserProfile.objects.filter(user=user).first()
+            if not profile:
+                return JsonResponse({"message": "Profile doesn't exist"})
+            if len(str(phone_number)) != 10:
+                    return JsonResponse({"message": "Phone number not valid"})
+            if profile.profile_img != "":
+                    old_post_img = profile.profile_img.path
+                    if os.path.exists(old_post_img):
+                        os.remove(old_post_img)
+            filename = f"profile_{user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            with open(profile_img_path, 'rb') as img_file:
+                profile.profile_img.save(filename, img_file)
+            profile.phone_number = phone_number
+            profile.address = address
+            profile.country = country
+            profile.save()      
+            return JsonResponse({"message": "Profile successfully updated"})
+        except:
+            return JsonResponse({"message": "Error occurred"})
     else:
-        return JsonResponse({"message": "Invalid request method"}, status=405)
+        return JsonResponse({"message": "Invalid request method"})
 
     
 
