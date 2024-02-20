@@ -31,10 +31,11 @@ def validate_get_user_by_id(id):
 def validate_delete_user( id):
     user = accessor.get_user_by_id(id)
     profile = UserProfile.objects.filter(user = id).first()
-    if profile.profile_img != "":
-        old_post_img = profile.profile_img.path
-        if os.path.exists(old_post_img):
-            os.remove(old_post_img)
+    if profile:
+        if profile.profile_img != "":
+            old_post_img = profile.profile_img.path
+            if os.path.exists(old_post_img):
+                os.remove(old_post_img)
     if user:
         json_data = {
             "name": user.name,
@@ -51,7 +52,7 @@ def validate_update_user(data,id):
         user1 = CustomUser.objects.exclude(id=id).filter(email=data["email"]).first()
         if user1:
             return "Email already exists", 400
-        user, profile = accessor.get_user_by_id(id)
+        user = accessor.get_user_by_id(id)
         if user != None:
             accessor.update_user(data, id)
             return "Successfully updated", 200

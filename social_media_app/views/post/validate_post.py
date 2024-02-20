@@ -1,6 +1,8 @@
 from . import accessor
 from ..user import accessor as user_accessor
 import os
+from social_media_app.models import Post
+
 
 def validate_create_data(data, id):
     user = user_accessor.get_user_by_id(id)
@@ -25,7 +27,7 @@ def validate_get_posts():
     return "No data found", 400
 
 def validate_get_post_by_id(id):
-    post = accessor.get_post_by_id(id)
+    post = Post.objects.filter(id = id).values().first()
     if post:
         return post, 200
     return "Post doesn't exists", 400

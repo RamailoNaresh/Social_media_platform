@@ -23,7 +23,7 @@ def create_comment(request, user_id, post_id):
 
 def get_comment_by_id(request, id):
     if request.method == "GET":
-        comment = accessor.get_comment_by_id(id)
+        comment = Comment.objects.filter(id = id).values().first()
         if comment:
             return JsonResponse({"status": 200,"message":"Data received", "data":comment})
         return JsonResponse({"status":400,"message": "Data doesn't exists"})
