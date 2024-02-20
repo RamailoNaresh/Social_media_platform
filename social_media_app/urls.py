@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import post_views, user_views, comment_views
+from .views.user import user_views
+from .views.comment import comment_views
+from .views.post import post_views
 
 urlpatterns = [
     path("get_user/", user_views.get_user, name = "users"),
